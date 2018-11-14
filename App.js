@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Button, FlatList, TextInput} from 'react-native';
+import {StyleSheet, Text, View, Button, FlatList, TextInput, TouchableHighlight} from 'react-native';
 import ItemTodo from './item-todo';
 
 var SQLite = require('react-native-sqlite-storage');
+
 const SQL_CREATE_TODO = 'CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, checked INTEGER NOT NULL)';
-const SQL_INSERT_TODO = 'INSERT INTO todos (name, checked) VALUES ("Terminar App EmiStore", 0), ("Leer sobre Redux", 0), ("Estudiar Js", 0), ("Lavar la ropa", 0), ("Terminar de leer libro", 0), ("Ir al Gym", 0), ("Farrear", 0)';
 const SQL_DELETE = 'DELETE todos WHERE id = ?';
 const SQL_UPDATE_STATE = 'UPDATE todos SET checked = ? WHERE id = ?';
+const SQL_ADD_TODO = 'INSERT INTO todos (name, checked) values (?, 1)';
+const SQL_DROP_TODO = 'DROP TABLE todos';
 
 const NAME_DB = 'database-test1.db';
 const LOCATION = 'default';
@@ -18,11 +20,15 @@ export default class App extends Component{
         todoList: [],
         task: ''
     }
-}
+  }
+
   componentDidMount(){
     this.connection();
   }
 
+  /**
+   * Metodo para crear la Base de datos si no ha sido creada
+   */
   connection() {
       console.log('Estableciendo coneccion...');
       SQLite.openDatabase({ name: NAME_DB, location: LOCATION }, (db) => {  
@@ -38,35 +44,24 @@ export default class App extends Component{
       } )
   }
 
-  insert(){
-    console.log('Estableciendo coneccion...');
-    SQLite.openDatabase({ name: NAME_DB, location: LOCATION }, (db) => {
-      console.log( 'Success: ', db );
-      db.transaction((tx)=>{
-        tx.executeSql(SQL_INSERT_TODO, [], (tx, results) =>{
-          console.log('insert results' + results);
-        })
-      })
-    }, (error) => {
-      console.log( 'Error: ', success );
-    } )
-  }
-
+  /**
+   * Metdo para agregar una Tarea por hacer
+   */
   add(text) {
       SQLite.openDatabase({ name: NAME_DB, location: LOCATION }, (db) => {
-        
         db.transaction((tx)=>{
-          tx.executeSql('INSERT INTO todos (name, checked) values (?, 0)', [text], (tx, results) =>{
-            console.log('insert results' + results);
+          tx.executeSql(SQL_ADD_TODO, [text], (tx, results) =>{
+            this.getAllItems();
           })
         })
-        this.getAllItems();
-
       }, (error) => {
         console.log( 'Error: ', error );
       } )
   }
 
+  /**
+   * Metodo para traer todos los Registros
+   */
   getAllItems(){
     SQLite.openDatabase({ name: NAME_DB, location: LOCATION }, (db) => {
       db.transaction((tx)=>{
@@ -80,7 +75,12 @@ export default class App extends Component{
       console.log( 'Error: ', error );
     } )
   }
-  
+
+  /**
+   * Metodo para Actualizar una tarea existente
+   * @param {*} checked 
+   * @param {*} id Identificador de la Tarea
+   */
   update(checked, id) {
     console.log("update ");
   }
@@ -88,7 +88,7 @@ export default class App extends Component{
   delete(id) {
     console.log("delete");
   }
-
+  
   renderItem = ( { item }) => <ItemTodo onPressEvent={ this.props.onPressEvent } todo = { item } />
   emptyComponent = () => <Text>Todo empty </Text>
   keyExtractor = item => item.id.toString();
@@ -149,5 +149,9 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'blue',
     borderWidth: 1,
-  }
+  },
+  context:{
+    paddingLeft: 10,
+    justifyContent: 'center'
+  },
 });

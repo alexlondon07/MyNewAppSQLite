@@ -19,9 +19,9 @@ const ItemTodo = (props) => {
                     source ={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-2IFfE-OJ6zJfHhuKspsPvBNk6W2OOsQuo7naPue3rEBFvOHl'}}
                 />
             </View>
-            <View style={ styles.context }>
-                <View>
-                    <Text style={ styles.name }> { props.todo.name }</Text>
+            <View>
+                <View >
+                    <Text style={ styles.name }  > { props.todo.name }</Text>
                     <Text>{ props.todo.checked  ? 'Terminado' : 'Sin terminar' }</Text>
                 </View>
             </View>
@@ -34,10 +34,6 @@ const ItemTodo = (props) => {
 const styles = StyleSheet.create({
     container:{
         flexDirection: 'row',
-    },
-    context:{
-        paddingLeft: 10,
-        justifyContent: 'center'
     },
     image:{ 
         width: 70,
